@@ -9,7 +9,7 @@
 
 #include "nrf24l01.h"
 #include "delay.h"
-//#include "systick.h"
+#include "systick.h"
 
 #ifdef PERIPHERAL_NRF24L01
 
@@ -30,7 +30,7 @@ uint32_t RF24::millis(void)
 
 uint32_t RF24::systick(void)
 {
-    return 0; // SysTick();
+    return SysTick();
 }
 
 /****************************************************************************/
