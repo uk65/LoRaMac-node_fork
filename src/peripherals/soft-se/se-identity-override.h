@@ -1,39 +1,6 @@
-/*!
- * \file  se-identity.h
- *
- * \brief Secure Element identity and keys
- *
- * The Clear BSD License
- * Copyright Semtech Corporation 2021. All rights reserved.
- * Copyright Stackforce 2021. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted (subject to the limitations in the disclaimer
- * below) provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Semtech corporation nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
- * THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
- * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT
- * NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL SEMTECH CORPORATION BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-#ifndef __SOFT_SE_IDENTITY_H__
-#define __SOFT_SE_IDENTITY_H__
+
+#ifndef __SOFT_SE_IDENTITY_OVERRIDE_H__
+#define __SOFT_SE_IDENTITY_OVERRIDE_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,39 +38,46 @@ extern "C" {
  ******************************************************************************
  */
 
+// Funktioniert hat:           STATIC_DEVICE_EUI        1
+//                             LORAWAN_DEVIVE_EUI       aus TTN V.3  MSB
+//                             LORAWAN_JOIN_EUI         8 x 0x00
+//                             APP_KEY == NWK_KEY       == AppKey aus TTN V.3  MSB
+//                             Mac V.1.0.3 
+
+#define HOYMILES_DATA 1
+
 /*!
  * When set to 1 DevEui is LORAWAN_DEVICE_EUI
  * When set to 0 DevEui is automatically set with a value provided by MCU platform
  */
-#define STATIC_DEVICE_EUI                                  0
+#if defined(HOYMILES_DATA)
+  #undef STATIC_DEVICE_EUI
+  #define STATIC_DEVICE_EUI       1
+#endif
 
 /*!
  * end-device IEEE EUI (big endian)
  */
-#define LORAWAN_DEVICE_EUI                                 { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+#if defined(HOYMILES_DATA)
+  #undef LORAWAN_DEVICE_EUI
+  #define LORAWAN_DEVICE_EUI      { 0x70, 0xB3, 0xD5, 0x7E, 0xD0, 0x05, 0x8E, 0x30 }
+#endif
 
 /*!
  * App/Join server IEEE EUI (big endian)
  */
-#define LORAWAN_JOIN_EUI                                   { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+#if defined(HOYMILES_DATA)
+  #undef LORAWAN_JOIN_EUI 
+  #define LORAWAN_JOIN_EUI        { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+#endif
 
-/*!
- * Secure-element pin
- */
-#define SECURE_ELEMENT_PIN                                 { 0x00, 0x00, 0x00, 0x00 }
+#if defined(HOYMILES_DATA)
+  #define THIS_APP_KEY            { 0x09, 0xC6, 0x44, 0x38, 0xD2, 0x0B, 0x9E, 0x56, 0xE2, 0xD4, 0x1B, 0xC1, 0xA5, 0xD4, 0x6A, 0x16 }
+#else
+  #error "THIS_APP_KEY muss definiert sein"
+#endif
 
-/*!
- * When set to 1 DevAddr is LORAWAN_DEVICE_ADDRESS
- * When set to 0 DevAddr is automatically set with a value provided by a pseudo
- *      random generator seeded with a value provided by the MCU platform
- */
-#define STATIC_DEVICE_ADDRESS                              0
-
-/*!
- * Device address on the network (big endian)
- */
-#define LORAWAN_DEVICE_ADDRESS                             ( uint32_t )0x00000000
-
+#undef SOFT_SE_KEY_LIST
 #define SOFT_SE_KEY_LIST                                                                                            \
     {                                                                                                               \
         {                                                                                                           \
@@ -112,8 +86,7 @@ extern "C" {
              * WARNING: FOR 1.0.x DEVICES IT IS THE \ref LORAWAN_GEN_APP_KEY                                        \
              */                                                                                                     \
             .KeyID    = APP_KEY,                                                                                    \
-            .KeyValue = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, \
-                          0x3C },                                                                                   \
+            .KeyValue = THIS_APP_KEY,                                                                               \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \
@@ -121,8 +94,7 @@ extern "C" {
              * WARNING: FOR 1.0.x DEVICES IT IS THE \ref LORAWAN_APP_KEY                                            \
              */                                                                                                     \
             .KeyID    = NWK_KEY,                                                                                    \
-            .KeyValue = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, \
-                          0x3C },                                                                                   \
+            .KeyValue = THIS_APP_KEY,                                                                               \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \
@@ -148,8 +120,7 @@ extern "C" {
              * WARNING: NWK_S_KEY FOR 1.0.x DEVICES                                                                 \
              */                                                                                                     \
             .KeyID    = F_NWK_S_INT_KEY,                                                                            \
-            .KeyValue = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, \
-                          0x3C },                                                                                   \
+            .KeyValue = THIS_APP_KEY,                                                                               \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \
@@ -157,8 +128,7 @@ extern "C" {
              * WARNING: NOT USED FOR 1.0.x DEVICES. MUST BE THE SAME AS \ref LORAWAN_F_NWK_S_INT_KEY                \
              */                                                                                                     \
             .KeyID    = S_NWK_S_INT_KEY,                                                                            \
-            .KeyValue = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, \
-                          0x3C },                                                                                   \
+            .KeyValue = THIS_APP_KEY                                                                                \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \
@@ -166,16 +136,14 @@ extern "C" {
              * WARNING: NOT USED FOR 1.0.x DEVICES. MUST BE THE SAME AS \ref LORAWAN_F_NWK_S_INT_KEY                \
              */                                                                                                     \
             .KeyID    = NWK_S_ENC_KEY,                                                                              \
-            .KeyValue = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, \
-                          0x3C },                                                                                   \
+            .KeyValue = THIS_APP_KEY,                                                                               \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \
              * Application session key                                                                              \
              */                                                                                                     \
             .KeyID    = APP_S_KEY,                                                                                  \
-            .KeyValue = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, \
-                          0x3C },                                                                                   \
+            .KeyValue = THIS_APP_KEY,                                                                               \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \
@@ -299,13 +267,8 @@ extern "C" {
         },                                                                                                          \
     },
 
-#if __has_include("se-identity-override.h")
-  #include "se-identity-override.h"
-#endif
-
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif  //  __SOFT_SE_IDENTITY_H__
+#endif  //  __SOFT_SE_IDENTITY_OVERRIDE_H__

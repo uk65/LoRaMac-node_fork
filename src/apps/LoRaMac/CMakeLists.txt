@@ -40,7 +40,7 @@ cmake_minimum_required(VERSION 3.6)
 #---------------------------------------------------------------------------------------
 
 # Allow switching of sub projects
-set(SUB_PROJECT_LIST periodic-uplink-lpp fuota-test-01)
+set(SUB_PROJECT_LIST periodic-uplink-lpp fuota-test-01 hoymiles-data)
 set(SUB_PROJECT periodic-uplink-lpp CACHE STRING "Default sub project is periodic-uplink-lpp")
 set_property(CACHE SUB_PROJECT PROPERTY STRINGS ${SUB_PROJECT_LIST})
 
@@ -125,6 +125,36 @@ elseif(SUB_PROJECT STREQUAL fuota-test-01)
         "${CMAKE_CURRENT_LIST_DIR}/common/LmHandler/packages/LmhpRemoteMcastSetup.c"
     )
 
+elseif(SUB_PROJECT STREQUAL hoymiles-data)
+
+    #---------------------------------------------------------------------------------------
+    # Application common features handling
+    #---------------------------------------------------------------------------------------
+    list(APPEND ${PROJECT_NAME}_COMMON
+        "${CMAKE_CURRENT_LIST_DIR}/common/CayenneLpp.c"
+#        "${CMAKE_CURRENT_LIST_DIR}/common/cli.c"
+#        "${CMAKE_CURRENT_LIST_DIR}/common/LmHandlerMsgDisplay.c"
+        "${CMAKE_CURRENT_LIST_DIR}/common/NvmDataMgmt.c"
+    )
+
+    #---------------------------------------------------------------------------------------
+    # Application LoRaMac handler
+    #---------------------------------------------------------------------------------------
+    list(APPEND ${PROJECT_NAME}_LMH
+        "${CMAKE_CURRENT_LIST_DIR}/common/LmHandler/LmHandler.c"
+    )
+
+    #---------------------------------------------------------------------------------------
+    # LoRaMac handler applicative packages
+    #---------------------------------------------------------------------------------------
+    list(APPEND ${PROJECT_NAME}_LMHP
+        "${CMAKE_CURRENT_LIST_DIR}/common/LmHandler/packages/FragDecoder.c"
+        "${CMAKE_CURRENT_LIST_DIR}/common/LmHandler/packages/LmhpClockSync.c"
+        "${CMAKE_CURRENT_LIST_DIR}/common/LmHandler/packages/LmhpCompliance.c"
+        "${CMAKE_CURRENT_LIST_DIR}/common/LmHandler/packages/LmhpFragmentation.c"
+        "${CMAKE_CURRENT_LIST_DIR}/common/LmHandler/packages/LmhpRemoteMcastSetup.c"
+    )
+
 else()
     message(FATAL_ERROR "Unknown SUB_PROJECT")
 endif()
@@ -132,7 +162,10 @@ endif()
 #---------------------------------------------------------------------------------------
 # Application
 #---------------------------------------------------------------------------------------
-file(GLOB ${PROJECT_NAME}_SOURCES "${CMAKE_CURRENT_LIST_DIR}/${SUB_PROJECT}/${BOARD}/*.c")
+file(GLOB ${PROJECT_NAME}_SOURCES 
+    "${CMAKE_CURRENT_LIST_DIR}/${SUB_PROJECT}/${BOARD}/*.c"
+    "${CMAKE_CURRENT_LIST_DIR}/${SUB_PROJECT}/${BOARD}/*.cpp"
+)
 
 add_executable(${PROJECT_NAME}-${SUB_PROJECT}
                             ${${PROJECT_NAME}_COMMON}
@@ -173,7 +206,10 @@ target_include_directories(${PROJECT_NAME}-${SUB_PROJECT} PUBLIC
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:${BOARD},INTERFACE_INCLUDE_DIRECTORIES>>
 )
 
+# 11, 17, 23
 set_property(TARGET ${PROJECT_NAME}-${SUB_PROJECT} PROPERTY C_STANDARD 11)
+# 11, 14, 17, 20, 23, 26
+set_property(TARGET ${PROJECT_NAME}-${SUB_PROJECT} PROPERTY CXX_STANDARD 20)
 
 target_link_libraries(${PROJECT_NAME}-${SUB_PROJECT} m)
 
