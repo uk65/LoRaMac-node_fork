@@ -1,0 +1,8 @@
+
+#include "nrf24l01.h"
+
+#ifdef PERIPHERAL_NRF24L01
+
+NRF24L01_t    NRF24L01;
+
+#endif // PERIPHERAL_NRF24L01

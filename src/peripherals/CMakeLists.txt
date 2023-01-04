@@ -36,11 +36,27 @@ project(peripherals)
 cmake_minimum_required(VERSION 3.6)
 
 #---------------------------------------------------------------------------------------
+# Options
+#---------------------------------------------------------------------------------------
+
+# Allow selection of region
+option(PERIPHERAL_BH1750   "BH1750 luminosity sensor"                      OFF)
+option(PERIPHERAL_BMP280   "BMP280 temperature, humidity, pressure sensor" OFF)
+option(PERIPHERAL_NRF24L01 "RF24 radio"                                    OFF)
+option(PERIPHERAL_SSD1360  "SSD1360 LED driver"                            OFF)
+option(PERIPHERAL_VL53L1X  "VL53L1X laser distance flight sensor"          OFF)
+set(PERIPHERAL_LIST PERIPHERAL_BH1750 PERIPHERAL_BMP280 PERIPHERAL_NRF24L01 PERIPHERAL_SSD1360 PERIPHERAL_VL53L1X)
+
+
+#---------------------------------------------------------------------------------------
 # Target
 #---------------------------------------------------------------------------------------
 
 if(${SECURE_ELEMENT} MATCHES SOFT_SE)
-    file(GLOB ${PROJECT_NAME}_SOURCES "*.c" "soft-se/*.c")
+    file(GLOB ${PROJECT_NAME}_SOURCES
+        "*.c"
+        "soft-se/*.c"
+    )
 else()
     if(${SECURE_ELEMENT} MATCHES LR11XX_SE)
         if (${RADIO} MATCHES lr11xx)
@@ -61,6 +77,43 @@ else()
     else()
         message(FATAL_ERROR "No secure-element selected.")
     endif()
+endif()
+
+if(PERIPHERAL_BH1750 STREQUAL ON)
+set(${PROJECT_NAME}_SOURCES
+    ${${PROJECT_NAME}_SOURCES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/bh1750/bh1750.c"
+)
+endif()
+if(PERIPHERAL_BMP280 STREQUAL ON)
+set(${PROJECT_NAME}_SOURCES
+    ${${PROJECT_NAME}_SOURCES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/bmp280/bmp280.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/bmp280/bmp280_driver.c"
+)
+endif()
+if(PERIPHERAL_NRF24L01 STREQUAL ON)
+set(${PROJECT_NAME}_SOURCES
+    ${${PROJECT_NAME}_SOURCES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/nrf24l01/nrf24l01.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/nrf24l01/rf24.cpp"
+)
+endif()
+if(PERIPHERAL_SSD1306 STREQUAL ON)
+set(${PROJECT_NAME}_SOURCES
+    ${${PROJECT_NAME}_SOURCES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/ssd1306/ssd1306.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ssd1306/ssd1306_fonts.c"
+)
+endif()
+if(PERIPHERAL_VL53L1X STREQUAL ON)
+set(${PROJECT_NAME}_SOURCES
+    ${${PROJECT_NAME}_SOURCES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/vl53l1x/vl53l1x.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/vl53l1x/vl53l1x_api.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/vl53l1x/vl53l1x_calibration.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/vl53l1x/vl53l1_platform.c"
+)
 endif()
 
 add_library(${PROJECT_NAME} OBJECT EXCLUDE_FROM_ALL ${${PROJECT_NAME}_SOURCES})
@@ -90,6 +143,15 @@ else()
         )
     endif()
 endif()
+
+# Loops through all peripherals and add compile time definitions for the enabled ones.
+foreach(PERIPHERAL ${PERIPHERAL_LIST})
+    if(${PERIPHERAL})
+        target_compile_definitions(${PROJECT_NAME} PUBLIC -D"${PERIPHERAL}")
+        target_compile_definitions(${PROJECT_NAME} PUBLIC -D"${PERIPHERAL}_LORAMAC_NODE_IMPL")
+    endif()
+endforeach()
+
 
 target_include_directories( ${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
