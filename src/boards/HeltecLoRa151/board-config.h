@@ -97,6 +97,12 @@ extern "C" {
 #define LED_1                                       PB_8
 #define LED_2                                       NC
 
+// External 3.3 V sensor supply. The load switch is active low.
+#define VEXT                                        PB_3
+
+// VDD voltage divider output (ADC1 channel 2).
+#define POWER_DETECTION                             PA_2
+
 // Wenn low bei Reset ==> Rücksetzen des NVM
 #define NVM_RESET                                   PA_8
 
@@ -125,8 +131,8 @@ extern "C" {
 #define I2C_SCL                                     PB_6
 #define I2C_SDA                                     PB_7
 
-#define UART_TX                                     NC
-#define UART_RX                                     NC
+#define UART_TX                                     PA_9
+#define UART_RX                                     PA_10
 
 #ifdef __cplusplus
 }

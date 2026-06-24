@@ -32,8 +32,8 @@
 ## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ## POSSIBILITY OF SUCH DAMAGE.
 ##
+cmake_minimum_required(VERSION 3.10)
 project(HeltecLoRa151)
-cmake_minimum_required(VERSION 3.6)
 enable_language(ASM)
 
 #---------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ endif()
 
 add_library(${PROJECT_NAME} OBJECT EXCLUDE_FROM_ALL ${${PROJECT_NAME}_SOURCES})
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC -DUSE_HAL_DRIVER -DSTM32L151xC -D${MBED_RADIO_SHIELD} -D${RADIO_UPPERCASE})
+target_compile_definitions(${PROJECT_NAME} PUBLIC -DUSE_HAL_DRIVER -DSTM32L151xC -DHELTEC_LORA_151 -D${MBED_RADIO_SHIELD} -D${RADIO_UPPERCASE})
 
 # Add define if LR-FHSS modulation is supported
 target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<BOOL:${LORAMAC_LR_FHSS_IS_ON}>:LORAMAC_LR_FHSS_IS_ON>)

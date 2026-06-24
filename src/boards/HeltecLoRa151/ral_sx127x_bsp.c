@@ -79,7 +79,11 @@ void ral_sx127x_bsp_get_tx_cfg( const void* context, const ral_sx127x_bsp_tx_cfg
 {
     int8_t pwr = input_params->system_output_pwr_in_dbm;
 
-#if defined( SX1272MB2DAS )
+#if defined( HELTEC_LORA_151 )
+    // The board RF matching network is connected to the SX1276 PA_BOOST pin.
+    output_params->pa_cfg.pa_select           = SX127X_PA_SELECT_BOOST;
+    output_params->pa_cfg.is_20_dbm_output_on = true;
+#elif defined( SX1272MB2DAS )
     output_params->pa_cfg.pa_select           = SX127X_PA_SELECT_RFO;
     output_params->pa_cfg.is_20_dbm_output_on = false;
 #elif defined( SX1276MB1LAS )

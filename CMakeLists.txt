@@ -32,7 +32,7 @@
 ## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ## POSSIBILITY OF SUCH DAMAGE.
 ##
+cmake_minimum_required(VERSION 3.10)
 project(loramac-node)
-cmake_minimum_required(VERSION 3.6)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)

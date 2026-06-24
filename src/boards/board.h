@@ -39,6 +39,7 @@ extern "C"
 {
 #endif
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "utilities.h"
 /*!
@@ -64,6 +65,9 @@ void BoardResetMcu( void );
  * \brief Initializes the boards peripherals.
  */
 void BoardInitPeriph( void );
+
+/*!\n+ * \brief Controls the external 3.3 V sensor supply.\n+ */
+void BoardSetVext( bool enable );
 
 /*!
  * \brief De-initializes the target board peripherals to decrease power

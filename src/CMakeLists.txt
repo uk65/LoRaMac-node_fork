@@ -32,8 +32,8 @@
 ## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ## POSSIBILITY OF SUCH DAMAGE.
 ##
+cmake_minimum_required(VERSION 3.10)
 project(lora-mac)
-cmake_minimum_required(VERSION 3.6)
 
 #---------------------------------------------------------------------------------------
 # Options
@@ -210,18 +210,7 @@ elseif(BOARD STREQUAL HeltecLoRa151)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/boards/HeltecLoRa151)
 
     # Configure radio
-    if(MBED_RADIO_SHIELD STREQUAL SX1272MB2DAS)
-        set(RADIO sx1272 CACHE INTERNAL "Radio sx1272 selected")
-    elseif(MBED_RADIO_SHIELD STREQUAL SX1276MB1LAS OR MBED_RADIO_SHIELD STREQUAL SX1276MB1MAS)
-        set(RADIO sx1276 CACHE INTERNAL "Radio sx1276 selected")
-    elseif(MBED_RADIO_SHIELD STREQUAL SX1261MBXBAS OR MBED_RADIO_SHIELD STREQUAL SX1262MBXCAS OR MBED_RADIO_SHIELD STREQUAL SX1262MBXDAS)
-        set(RADIO sx126x CACHE INTERNAL "Radio sx126x selected")
-    elseif(MBED_RADIO_SHIELD STREQUAL LR1110MB1XXS OR MBED_RADIO_SHIELD STREQUAL LR1120MB1XXS)
-        set(RADIO lr11xx CACHE INTERNAL "Radio lr11xx selected")
-    else()
-        message(STATUS "Please specify the MBED_RADIO_SHIELD!\nPossible values are: SX1272MB2DAS, SX1276MB1LAS, SX1276MB1MAS, SX1261MBXBAS, SX1262MBXCAS, SX1262MBXDAS, LR1110MB1XXS and  LR1120MB1XXS.")
-    endif()
-
+    set(RADIO sx1276 CACHE INTERNAL "Radio sx1276 selected")
 
 endif()
 

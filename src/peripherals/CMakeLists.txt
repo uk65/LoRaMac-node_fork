@@ -32,8 +32,8 @@
 ## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ## POSSIBILITY OF SUCH DAMAGE.
 ##
+cmake_minimum_required(VERSION 3.10)
 project(peripherals)
-cmake_minimum_required(VERSION 3.6)
 
 #---------------------------------------------------------------------------------------
 # Options
@@ -43,9 +43,9 @@ cmake_minimum_required(VERSION 3.6)
 option(PERIPHERAL_BH1750   "BH1750 luminosity sensor"                      OFF)
 option(PERIPHERAL_BMP280   "BMP280 temperature, humidity, pressure sensor" OFF)
 option(PERIPHERAL_NRF24L01 "RF24 radio"                                    OFF)
-option(PERIPHERAL_SSD1360  "SSD1360 LED driver"                            OFF)
+option(PERIPHERAL_SSD1306  "SSD1306 OLED driver"                            OFF)
 option(PERIPHERAL_VL53L1X  "VL53L1X laser distance flight sensor"          OFF)
-set(PERIPHERAL_LIST PERIPHERAL_BH1750 PERIPHERAL_BMP280 PERIPHERAL_NRF24L01 PERIPHERAL_SSD1360 PERIPHERAL_VL53L1X)
+set(PERIPHERAL_LIST PERIPHERAL_BH1750 PERIPHERAL_BMP280 PERIPHERAL_NRF24L01 PERIPHERAL_SSD1306 PERIPHERAL_VL53L1X)
 
 
 #---------------------------------------------------------------------------------------

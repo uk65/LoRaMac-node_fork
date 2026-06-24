@@ -58,11 +58,13 @@
  */
 Gpio_t Led1;
 Gpio_t Nvm_Reset;
+Gpio_t Vext;
 
 /*
  * MCU objects
  */
 Adc_t  Adc;
+I2c_t  I2c;
 Uart_t Uart2;
 
 /*!
@@ -112,6 +114,15 @@ void BoardCriticalSectionEnd(uint32_t *mask)
 
 void BoardInitPeriph(void)
 {
+    GpioInit( &Vext, VEXT, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
+    BoardSetVext( true );
+    I2cInit( &I2c, I2C_1, I2C_SCL, I2C_SDA );
+}
+
+void BoardSetVext( bool enable )
+{
+    // The board load switch is active low.
+    GpioWrite( &Vext, enable ? 0 : 1 );
 }
 
 void BoardInitMcu(void)
@@ -128,12 +139,10 @@ void BoardInitMcu(void)
 
         SystemClockConfig();
 
-        UsbIsConnected = true;
-
         FifoInit(&Uart2.FifoTx, Uart2TxBuffer, UART2_FIFO_TX_SIZE);
         FifoInit(&Uart2.FifoRx, Uart2RxBuffer, UART2_FIFO_RX_SIZE);
         // Configure your terminal for 8 Bits data (7 data bit + 1 parity bit), no parity and no flow ctrl
-        UartInit(&Uart2, UART_2, UART_TX, UART_RX);
+        UartInit(&Uart2, UART_1, UART_TX, UART_RX);
         UartConfig(&Uart2, RX_TX, 921600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL);
 
         RtcInit();
@@ -148,7 +157,7 @@ void BoardInitMcu(void)
         SystemClockReConfig();
     }
 
-    AdcInit(&Adc, NC);  // Just initialize ADC
+    AdcInit(&Adc, POWER_DETECTION);
 
     radio_context_t *radio_context = radio_board_get_radio_context_reference();
     SpiInit(&radio_context->spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC);
@@ -221,9 +230,13 @@ void BoardGetUniqueId(uint8_t * id)
 /*!
  * Battery thresholds
  */
-#define BATTERY_MAX_LEVEL 3000       // mV
-#define BATTERY_MIN_LEVEL 2400       // mV
-#define BATTERY_SHUTDOWN_LEVEL 2300  // mV
+#define BATTERY_MAX_LEVEL 3700       // mV
+#define BATTERY_MIN_LEVEL 3000       // mV
+#define BATTERY_SHUTDOWN_LEVEL 2800  // mV
+
+#define POWER_DETECTION_R_HIGH 220000U
+#define POWER_DETECTION_R_LOW  100000U
+#define ADC_FULL_SCALE         4095U
 
 #define BATTERY_LORAWAN_UNKNOWN_LEVEL 255
 #define BATTERY_LORAWAN_MAX_LEVEL 254
@@ -239,15 +252,26 @@ void BoardGetUniqueId(uint8_t * id)
 
 static uint16_t BatteryVoltage = BATTERY_MAX_LEVEL;
 
+static uint32_t BoardMeasureVdda( void )
+{
+    uint16_t vref = AdcReadChannel( &Adc, ADC_CHANNEL_VREFINT );
+
+    if( vref == 0 )
+    {
+        return 0;
+    }
+
+    return ( ( uint32_t ) VDDA_VREFINT_CAL * VREFINT_CAL ) / vref;
+}
+
 uint16_t BoardBatteryMeasureVoltage( void )
 {
-    uint16_t vref = 0;
+    uint16_t adc = AdcReadChannel( &Adc, ADC_CHANNEL_2 );
+    uint32_t vdda = BoardMeasureVdda( );
 
-    // Read the current Voltage
-    vref = AdcReadChannel( &Adc, ADC_CHANNEL_VREFINT );
-
-    // Compute and return the Voltage in millivolt
-    return ( ( ( uint32_t ) VDDA_VREFINT_CAL * VREFINT_CAL ) / vref );
+    // PA2 measures VDD through the 220 kOhm / 100 kOhm divider.
+    return ( uint16_t )( ( vdda * adc * ( POWER_DETECTION_R_HIGH + POWER_DETECTION_R_LOW ) ) /
+                         ( ADC_FULL_SCALE * POWER_DETECTION_R_LOW ) );
 }
 
 uint32_t BoardGetBatteryVoltage( void )
@@ -292,12 +316,10 @@ int16_t BoardGetTemperature( void )
 {
     uint16_t tempRaw = 0;
 
-    BatteryVoltage = BoardBatteryMeasureVoltage( );
-
     tempRaw = AdcReadChannel( &Adc, ADC_CHANNEL_TEMPSENSOR );
 
     // Compute and return the temperature in degree celcius * 256
-    return ( int16_t ) COMPUTE_TEMPERATURE( tempRaw, BatteryVoltage );
+    return ( int16_t ) COMPUTE_TEMPERATURE( tempRaw, BoardMeasureVdda( ) );
 }
 
 static void BoardUnusedIoInit( void )

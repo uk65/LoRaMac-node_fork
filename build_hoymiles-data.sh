@@ -2,10 +2,15 @@
 
 cd build
 
+toolchain_args=()
+if [[ ! -f CMakeCache.txt ]]; then
+    toolchain_args+=( -DCMAKE_TOOLCHAIN_FILE="../cmake/toolchain-arm-none-eabi.cmake" )
+fi
+
 cmake \
     -DCMAKE_BUILD_TYPE=Release \
-    -DTOOLCHAIN_PREFIX="/usr/local/gcc-arm-none-eabi/" \
-    -DCMAKE_TOOLCHAIN_FILE="../cmake/toolchain-arm-none-eabi.cmake" \
+    -DTOOLCHAIN_PREFIX="/opt/homebrew" \
+    "${toolchain_args[@]}" \
     -DAPPLICATION="LoRaMac" \
     -DSUB_PROJECT="hoymiles-data" \
     -DCLASSB_ENABLED="ON" \

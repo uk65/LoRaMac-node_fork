@@ -79,4 +79,4 @@ int8_t VL53L1X_CalibrateXtalk(uint16_t dev, uint16_t TargetDistInMm, uint16_t * 
     return status;
 }
 
-#endif PERIPHERAL_VL53L1X
+#endif // PERIPHERAL_VL53L1X
